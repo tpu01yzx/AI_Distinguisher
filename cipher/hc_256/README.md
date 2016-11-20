@@ -1,3 +1,4 @@
+```
 Usage: HC256.exe [-t] [-h] [-k KEY] [-i IV] [-s STRING] [-o STRING]
         -t:             测试
         -h:             显示帮助
@@ -7,3 +8,4 @@ Usage: HC256.exe [-t] [-h] [-k KEY] [-i IV] [-s STRING] [-o STRING]
         -o STRING:      输出到文件名"，默认为"out.bin"
 
 编译平台：Windows VS2015
+```
