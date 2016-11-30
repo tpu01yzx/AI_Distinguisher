@@ -21,7 +21,7 @@ static void print_usage(char *self)
 	printf("	-h:		显示帮助\n");
 	printf("	-k KEY:		加密密钥，32位，默认为\"000000000000\"\n");
 	printf("	-i IV:		加密IV，32位，默认为\"000000000000\"\n");
-	printf("	-l NUMBER:	输出密码流长度(byte)\n，默认为1024");
+	printf("	-l NUMBER:	输出密码流长度(byte)，默认为1024\n");
 	printf("	-o STRING:	输出到文件名\"\n");
 	printf("	-q bool:	只输出密码流\"\n");
 }
