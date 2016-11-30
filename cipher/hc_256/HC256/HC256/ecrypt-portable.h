@@ -21,7 +21,7 @@
 #define ECRYPT_PORTABLE
 
 #include "ecrypt-config.h"
-
+#include "ecrypt-machine.h"
 /* ------------------------------------------------------------------------- */
 
 /*
@@ -296,7 +296,7 @@ typedef unsigned I64T u64;
 
 #endif
 
-#include "ecrypt-machine.h"
+
 
 /* ------------------------------------------------------------------------- */
 

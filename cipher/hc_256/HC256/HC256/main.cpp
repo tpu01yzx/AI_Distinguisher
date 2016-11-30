@@ -1,15 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <malloc.h>
+#include "stdafx.h"
 #include "getopt.h"
-#include "crypto.h"
+#include <malloc.h>
+
 
 // prints string as hex
-void phex(unsigned char* str)
+void phex(unsigned char* str,int len)
 {
+	if (len > 32)
+		len = 16;
 	unsigned char i;
-	for (i = 0; i < 16; ++i)
+	for (i = 0; i < len; ++i)
 		printf("%.2X", str[i]);
 	printf("\n");
 }
@@ -21,8 +21,7 @@ static void print_usage(char *self)
 	printf("	-h:		显示帮助\n");
 	printf("	-k KEY:		加密密钥，32位，默认为\"000000000000\"\n");
 	printf("	-i IV:		加密IV，32位，默认为\"000000000000\"\n");
-	//printf("	-s STRING:	加密字符串，默认为\"Tech otakus save the world!\"\n");
-	printf("	-l NUMBER:	输出密码流长度(byte)\n");
+	printf("	-l NUMBER:	输出密码流长度(byte)\n，默认为1024");
 	printf("	-o STRING:	输出到文件名\"\n");
 	printf("	-q bool:	只输出密码流\"\n");
 }
@@ -39,11 +38,9 @@ int main(int argc, char **argv) {
 	unsigned char key[32] = "000000000000";
 	unsigned char iv[32] = "000000000000";
 	unsigned char buf2[1024] = "";
-	unsigned char buf3[1024] = "";
-	//char *target = "Tech otakus save the world!";
 	char *output = "out.bin";
 	int opt;
-	while ((opt = getopt(argc, argv, "thi:k:s:")) != -1) {
+	while ((opt = getopt(argc, argv, "thi:k:l:")) != -1) {
 		switch (opt) {
 		case 't':
 			break;
@@ -102,9 +99,11 @@ int main(int argc, char **argv) {
 	// Encrypt buffer 1 and placed the encrypted contents into buffer 2.
 	socket->encrypt(buf1, len, buf2);
 	
-	if(!quite)
+	if (!quite) {
 		printf("加密后：");
-	phex(buf2);
+		phex(buf2,len);
+	}
+	
 	// Decrypt buffer 2 into buffer 3.
 	//socket->decrypt(buf2, strlen(target), buf3);
 
@@ -120,6 +119,4 @@ int main(int argc, char **argv) {
 	}
 	fwrite(buf2, len, 1, fp);
 	fclose(fp);
-	
-	getchar();
 }

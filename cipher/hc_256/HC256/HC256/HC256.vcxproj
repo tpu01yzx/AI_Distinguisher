@@ -113,7 +113,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="crypto.cpp" />
-    <ClCompile Include="crypto.h" />
     <ClCompile Include="ecrypt-sync.cpp" />
     <ClCompile Include="getopt.c" />
     <ClCompile Include="getopt1.c" />
@@ -127,6 +126,8 @@
     <ClInclude Include="ecrypt-sync.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="getopt_int.h" />
+    <ClInclude Include="stdafx.h" />
+	    <ClInclude Include="crypto.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
