@@ -282,10 +282,10 @@ partitionResultFile(int numOfFiles, int numOfSequences, int option, int testName
 	FILE	**fp = (FILE **)calloc(numOfFiles+1, sizeof(FILE *));
 	int		*results = (int *)calloc(numOfFiles, sizeof(int *));
 	char	*s[MAXFILESPERMITTEDFORPARTITION];
-	char	resultsDir[_MAX_PATH];
+	char	resultsDir[MAX_PATH];
 	
 	for ( i=0; i<MAXFILESPERMITTEDFORPARTITION; i++ )
-		s[i] = (char*)calloc(_MAX_PATH, sizeof(char));
+		s[i] = (char*)calloc(MAX_PATH, sizeof(char));
 	
 	sprintf(resultsDir, "experiments/%s/%s/results.txt", generatorDir[option], testNames[testNameID]);
 	

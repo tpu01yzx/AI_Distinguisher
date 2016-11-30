@@ -83,3 +83,11 @@ typedef struct _globalArgs_t {
 
 #define MODE_ASCII	(0)
 #define MODE_BINARY	(1)
+
+#ifndef MAX_PATH
+#ifdef _MAX_PATH
+#define MAX_PATH _MAX_PATH
+#else
+#define MAX_PATH 256
+#endif
+#endif
