@@ -15,6 +15,11 @@ OBJ = $(OBJDIR)/assess.o $(OBJDIR)/frequency.o $(OBJDIR)/blockFrequency.o \
       $(OBJDIR)/dfft.o $(OBJDIR)/cephes.o $(OBJDIR)/matrix.o \
       $(OBJDIR)/utilities.o $(OBJDIR)/generators.o $(OBJDIR)/genutils.o
 
+$(OBJ): | $(OBJDIR)
+
+$(OBJDIR):
+	test -d $(OBJDIR) || mkdir -p $(OBJDIR)
+
 assess: $(OBJ)
 	$(CC) -o $@ $(OBJ) -lm
 
@@ -90,5 +95,6 @@ $(OBJDIR)/generators.o: $(SRCDIR)/generators.c defs.h externs.h utilities.h \
 
 clean:
 	rm -f assess $(OBJDIR)/*.o
+	[[ -z "`ls -A $(OBJDIR)`" ]] && rmdir $(OBJDIR)
 
 rebuild: clean assess
