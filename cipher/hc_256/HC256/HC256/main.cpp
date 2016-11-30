@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 #include "getopt.h"
 #include "crypto.h"
 
@@ -19,8 +21,10 @@ static void print_usage(char *self)
 	printf("	-h:		显示帮助\n");
 	printf("	-k KEY:		加密密钥，32位，默认为\"000000000000\"\n");
 	printf("	-i IV:		加密IV，32位，默认为\"000000000000\"\n");
-	printf("	-s STRING:	加密字符串，默认为\"Tech otakus save the world!\"\n");
+	//printf("	-s STRING:	加密字符串，默认为\"Tech otakus save the world!\"\n");
+	printf("	-l NUMBER:	输出密码流长度(byte)\n");
 	printf("	-o STRING:	输出到文件名\"\n");
+	printf("	-q bool:	只输出密码流\"\n");
 }
 
 int main(int argc, char **argv) {
@@ -29,14 +33,14 @@ int main(int argc, char **argv) {
 		getchar();
 		return 0;
 	}
-
+	bool quite = false;
+	int len = 1024;
 	CRYPTOSOCKET *socket;
 	unsigned char key[32] = "000000000000";
 	unsigned char iv[32] = "000000000000";
-	unsigned char buf1[1024] = "";
 	unsigned char buf2[1024] = "";
 	unsigned char buf3[1024] = "";
-	char *target = "Tech otakus save the world!";
+	//char *target = "Tech otakus save the world!";
 	char *output = "out.bin";
 	int opt;
 	while ((opt = getopt(argc, argv, "thi:k:s:")) != -1) {
@@ -62,16 +66,26 @@ int main(int argc, char **argv) {
 			}
 			break;
 		case 's':
-			target = optarg;
+			//target = optarg;
 			break;
 		case 'o':
 			output = optarg;
+			break;
+		case 'l':
+			len = atoi(optarg);
+			break;
+		case 'q':
+			quite = true;
 			break;
 		case 'h':
 		default:
 			print_usage(argv[0]);
 			return 0;
 		}
+	}
+	unsigned char * buf1 = (unsigned char *)malloc(len);
+	for (int i = 0; i<len; i++) {
+		buf1[i] = rand() % 256;
 	}
 	// Generate a random key
 	//generateRandom(key, 32);
@@ -83,12 +97,13 @@ int main(int argc, char **argv) {
 	socket = new CRYPTOSOCKET(0, key, iv);
 
 	// Copy teststring into buffer 1
-	sprintf((char*)buf1, target);
+	//sprintf((char*)buf1, target);
 
 	// Encrypt buffer 1 and placed the encrypted contents into buffer 2.
-	socket->encrypt(buf1, strlen(target), buf2);
+	socket->encrypt(buf1, len, buf2);
 	
-	printf("加密后：");
+	if(!quite)
+		printf("加密后：");
 	phex(buf2);
 	// Decrypt buffer 2 into buffer 3.
 	//socket->decrypt(buf2, strlen(target), buf3);
@@ -99,10 +114,11 @@ int main(int argc, char **argv) {
 	FILE *fp;
 	fp = fopen(output, "w");
 	if(fp == NULL){
+		if (!quite)
 		printf("fopen error");
 		return -1;
 	}
-	fwrite(buf2, strlen(target), 1, fp);
+	fwrite(buf2, len, 1, fp);
 	fclose(fp);
 	
 	getchar();

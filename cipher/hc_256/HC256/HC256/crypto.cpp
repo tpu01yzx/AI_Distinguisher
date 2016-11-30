@@ -1,10 +1,10 @@
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <stdio.h>
-#include "crypto.h"
+
 // Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
-
+#include "crypto.h"
 
 CRYPTOSOCKET::CRYPTOSOCKET(int socket, unsigned char *key, unsigned char *iv) {
 	// Initialize the encryptor.
