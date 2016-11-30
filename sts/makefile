@@ -5,6 +5,8 @@ SRCDIR = $(ROOTDIR)/src
 OBJDIR = $(ROOTDIR)/obj
 VPATH  = src:obj:include
 
+all: assess
+
 OBJ = $(OBJDIR)/assess.o $(OBJDIR)/frequency.o $(OBJDIR)/blockFrequency.o \
       $(OBJDIR)/cusum.o $(OBJDIR)/runs.o $(OBJDIR)/longestRunOfOnes.o \
       $(OBJDIR)/serial.o $(OBJDIR)/rank.o $(OBJDIR)/discreteFourierTransform.o \
@@ -95,6 +97,6 @@ $(OBJDIR)/generators.o: $(SRCDIR)/generators.c defs.h externs.h utilities.h \
 
 clean:
 	rm -f assess $(OBJDIR)/*.o
-	[[ -z "`ls -A $(OBJDIR)`" ]] && rmdir $(OBJDIR)
+	[ -z "`ls -A $(OBJDIR)`" ] && rmdir $(OBJDIR)
 
 rebuild: clean assess
