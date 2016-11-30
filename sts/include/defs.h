@@ -50,7 +50,6 @@
 typedef unsigned char	BitSequence;
 
 typedef struct _testParameters {
-	int		n;
 	int		blockFrequencyBlockLength;
 	int		nonOverlappingTemplateBlockLength;
 	int		overlappingTemplateBlockLength;
@@ -59,3 +58,28 @@ typedef struct _testParameters {
 	int		approximateEntropyBlockLength;
 	int		numOfBitStreams;
 } TP;
+
+typedef struct _globalArgs_t {  
+	int		n;	
+	char pflag;
+	char npflag;
+	TP para;
+	int tests[NUMOFTESTS];
+	int ptests;
+	int mode;
+    char *outFileName;    /* -O option */
+    FILE *outFile;    
+	char *inFileName;    /* -I option */
+    FILE *inFile;        
+} globalArgs_t;
+
+#define DEC_DIGITS_OF_INT32		(12)
+#define TIME_STR_LEN			(64)
+
+#define NO_ERROR					(0)
+#define ERROR_CANT_OPEN_FILE		(1)
+#define ERROR_BAD_TEST_PARAMETER	(2)
+#define ERROR_BAD_MODE_PARAMETER	(3)
+
+#define MODE_ASCII	(0)
+#define MODE_BINARY	(1)

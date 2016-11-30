@@ -311,6 +311,10 @@ cephes_erfc(double x)
 	return one_sqrtpi*exp(-x*x)*q2;
 }
 
+#ifdef _MSC_VER
+double erf(double x){return cephes_erf(x);}
+double erfc(double x){return cephes_erfc(x);}
+#endif
 
 double
 cephes_normal(double x)

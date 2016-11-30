@@ -13,3 +13,7 @@ int		convertToBits(BYTE *x, int xBitLength, int bitsNeeded, int *num_0s, int *nu
 void	openOutputStreams(int option);
 void	invokeTestSuite(int option, char *streamFile);
 void	nist_test_suite();
+
+int split(const char *src, const char *separator, int *dest, int size);
+char Check_Range(const int *arr, int num, int min, int max) ;
+char *gettime();
