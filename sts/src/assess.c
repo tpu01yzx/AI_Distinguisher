@@ -287,7 +287,7 @@ partitionResultFile(int numOfFiles, int numOfSequences, int option, int testName
 	for ( i=0; i<MAXFILESPERMITTEDFORPARTITION; i++ )
 		s[i] = (char*)calloc(MAX_PATH, sizeof(char));
 	
-	sprintf(resultsDir, "experiments/%s/%s/results.txt", generatorDir[option], testNames[testNameID]);
+	sprintf(resultsDir, "experiments/%s/%s_results.txt", generatorDir[option], testNames[testNameID]);
 	
 	if ( (fp[numOfFiles] = fopen(resultsDir, "r")) == NULL ) {
 		printf("%s", resultsDir);
@@ -296,12 +296,7 @@ partitionResultFile(int numOfFiles, int numOfSequences, int option, int testName
 	}
 	
 	for ( i=0; i<numOfFiles; i++ ) {
-		if ( i < 10 )
-			sprintf(s[i], "experiments/%s/%s/data%1d.txt", generatorDir[option], testNames[testNameID], i+1);
-		else if (i < 100)
-			sprintf(s[i], "experiments/%s/%s/data%2d.txt", generatorDir[option], testNames[testNameID], i+1);
-		else
-			sprintf(s[i], "experiments/%s/%s/data%3d.txt", generatorDir[option], testNames[testNameID], i+1);
+			sprintf(s[i], "experiments/%s/%s_data%d.txt", generatorDir[option], testNames[testNameID], i+1);
 	}
 	numread = 0;
 	m = numOfFiles/20;
@@ -384,12 +379,7 @@ postProcessResults(int option)
 				else
 					numOfFiles = 2;
 				for ( k=0; k<numOfFiles; k++ ) {
-					if ( k < 10 )
-						sprintf(s, "experiments/%s/%s/data%1d.txt", generatorDir[option], testNames[i], k+1);
-					else if ( k < 100 )
-						sprintf(s, "experiments/%s/%s/data%2d.txt", generatorDir[option], testNames[i], k+1);
-					else
-						sprintf(s, "experiments/%s/%s/data%3d.txt", generatorDir[option], testNames[i], k+1);
+					sprintf(s, "experiments/%s/%s_data%d.txt", generatorDir[option], testNames[i], k+1);
 					if ( (i == TEST_RND_EXCURSION) || (i == TEST_RND_EXCURSION_VAR) ) 
 						randomExcursionSampleSize = computeMetrics(s,i);
 					else
@@ -397,7 +387,7 @@ postProcessResults(int option)
 				}
 			}
 			else {
-				sprintf(s, "experiments/%s/%s/results.txt", generatorDir[option], testNames[i]);
+				sprintf(s, "experiments/%s/%s_results.txt", generatorDir[option], testNames[i]);
 				generalSampleSize = computeMetrics(s,i);
 			}
 		}
