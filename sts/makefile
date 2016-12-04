@@ -97,6 +97,6 @@ $(OBJDIR)/generators.o: $(SRCDIR)/generators.c defs.h externs.h utilities.h \
 
 clean:
 	rm -f assess $(OBJDIR)/*.o
-	[ -z "`ls -A $(OBJDIR)`" ] && rmdir $(OBJDIR)
+	[ -d "$(OBJDIR)" ] && [ -z "`ls -A $(OBJDIR)`" ] && rmdir $(OBJDIR) || true
 
 rebuild: clean assess
