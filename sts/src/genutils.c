@@ -172,10 +172,8 @@ void bshr(BYTE *x, int l)
 ******************************************/
 int Mult(BYTE *A, BYTE *B, int LB, BYTE *C, int LC)
 {
-	int		i, j, k, LA;
+	int		i, j, k;
 	DIGIT	result;
-
-	LA = LB + LC;
 
 	for ( i=LB-1; i>=0; i-- ) {
 		result = 0;

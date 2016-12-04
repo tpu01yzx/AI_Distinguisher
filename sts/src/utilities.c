@@ -35,7 +35,7 @@ displayGeneratorOptions()
 int
 generatorOptions(char** streamFile)
 {
-	char	file[_MAX_PATH];
+	char	file[MAX_PATH];
 	int		option = NUMOFGENERATORS+1;
 	FILE	*fp;	
 	
@@ -45,9 +45,9 @@ generatorOptions(char** streamFile)
 			case 0:
 				printf("\t\tUser Prescribed Input File: ");
 				scanf("%s", file);
-				*streamFile = (char*)calloc(_MAX_PATH, sizeof(char));
+				*streamFile = (char*)calloc(MAX_PATH, sizeof(char));
 				//sprintf(*streamFile, "%s", file);
-				strncpy(*streamFile, file, _MAX_PATH);
+				strncpy(*streamFile, file, MAX_PATH);
 				printf("\n");
 				if ( (fp = fopen(*streamFile, "r")) == NULL ) {
 					printf("File Error:  file %s could not be opened.\n",  *streamFile);
@@ -375,7 +375,7 @@ void
 openOutputStreams(int option)
 {
 	int		i, numOfBitStreams, numOfOpenFiles = 0;
-	char	freqfn[_MAX_PATH], summaryfn[_MAX_PATH], statsDir[_MAX_PATH], resultsDir[_MAX_PATH];
+	char	freqfn[MAX_PATH], summaryfn[MAX_PATH], statsDir[MAX_PATH], resultsDir[MAX_PATH];
 	
 	sprintf(freqfn, "experiments/%s/freq.txt", generatorDir[option]);
 	if ( (freqfp = fopen(freqfn, "w")) == NULL ) {
