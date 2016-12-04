@@ -2,6 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include "../include/externs.h"
+#include "../include/cephes.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
                           F R E Q U E N C Y  T E S T

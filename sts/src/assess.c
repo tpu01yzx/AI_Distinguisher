@@ -49,11 +49,16 @@
 #include "../include/decls.h"
 #include "../include/cephes.h"  
 #include "../include/utilities.h"
+#include "../include/getopt.h"
 
 void	partitionResultFile(int numOfFiles, int numOfSequences, int option, int testNameID);
 void	postProcessResults(int option);
 int		cmp(const double *a, const double *b);
 int		computeMetrics(char *s, int test);
+
+void display_usage();
+void ReadParameter(int argc, char *argv[]);
+void Exit(int code, const void *more);
 
 int
 main(int argc, char *argv[])
@@ -61,25 +66,32 @@ main(int argc, char *argv[])
 	int		i;
 	int		option;			/* TEMPLATE LENGTH/STREAM LENGTH/GENERATOR*/
 	char	*streamFile;	/* STREAM FILENAME     */
-	
+		
+	ReadParameter(argc, argv);
 
-	if ( argc != 2 ) {
-		printf("Usage: %s <stream length>\n", argv[0]);
-		printf("   <stream length> is the length of the individual bit stream(s) to be processed\n");
-		return 0;
+	if(args.inFileName != NULL) {
+		option = 0; streamFile = args.inFileName;
+	} else {
+		option = generatorOptions(&streamFile);
 	}
 
-	tp.n = atoi(argv[1]);
-	tp.blockFrequencyBlockLength = 128;
-	tp.nonOverlappingTemplateBlockLength = 9;
-	tp.overlappingTemplateBlockLength = 9;
-	tp.approximateEntropyBlockLength = 10;
-	tp.serialBlockLength = 16;
-	tp.linearComplexitySequenceLength = 500;
-	tp.numOfBitStreams = 1;
-	option = generatorOptions(&streamFile);
-	chooseTests();
-	fixParameters();
+	if(args.pflag == 1) {
+		for(i = 0; i < args.ptests; i++) {			
+			testVector[args.tests[i]] = 1;
+		}
+		if(testVector[0] == 1) {
+			for(i = 1; i <= NUMOFTESTS; i++ ) {
+				testVector[i] = 1;
+			}
+		}
+	} else {
+		chooseTests();
+	}
+
+	if(args.pflag == 0) {		
+		fixParameters();
+	}
+
 	openOutputStreams(option);
 	invokeTestSuite(option, streamFile);
 	fclose(freqfp);
@@ -90,15 +102,15 @@ main(int argc, char *argv[])
 			fclose(results[i]);
 	}
 	if ( (testVector[0] == 1) || (testVector[TEST_CUSUM] == 1) ) 
-		partitionResultFile(2, tp.numOfBitStreams, option, TEST_CUSUM);
+		partitionResultFile(2, args.para.numOfBitStreams, option, TEST_CUSUM);
 	if ( (testVector[0] == 1) || (testVector[TEST_NONPERIODIC] == 1) ) 
-		partitionResultFile(MAXNUMOFTEMPLATES, tp.numOfBitStreams, option, TEST_NONPERIODIC);
+		partitionResultFile(MAXNUMOFTEMPLATES, args.para.numOfBitStreams, option, TEST_NONPERIODIC);
 	if ( (testVector[0] == 1) || (testVector[TEST_RND_EXCURSION] == 1) )
-		partitionResultFile(8, tp.numOfBitStreams, option, TEST_RND_EXCURSION);
+		partitionResultFile(8, args.para.numOfBitStreams, option, TEST_RND_EXCURSION);
 	if ( (testVector[0] == 1) || (testVector[TEST_RND_EXCURSION_VAR] == 1) )
-		partitionResultFile(18, tp.numOfBitStreams, option, TEST_RND_EXCURSION_VAR);
+		partitionResultFile(18, args.para.numOfBitStreams, option, TEST_RND_EXCURSION_VAR);
 	if ( (testVector[0] == 1) || (testVector[TEST_SERIAL] == 1) )
-		partitionResultFile(2, tp.numOfBitStreams, option, TEST_SERIAL);
+		partitionResultFile(2, args.para.numOfBitStreams, option, TEST_SERIAL);
 	fprintf(summary, "------------------------------------------------------------------------------\n");
 	fprintf(summary, "RESULTS FOR THE UNIFORMITY OF P-VALUES AND THE PROPORTION OF PASSING SEQUENCES\n");
 	fprintf(summary, "------------------------------------------------------------------------------\n");
@@ -106,10 +118,160 @@ main(int argc, char *argv[])
 	fprintf(summary, "------------------------------------------------------------------------------\n");
 	fprintf(summary, " C1  C2  C3  C4  C5  C6  C7  C8  C9 C10  P-VALUE  PROPORTION  STATISTICAL TEST\n");
 	fprintf(summary, "------------------------------------------------------------------------------\n");
+	fflush(summary);
 	postProcessResults(option);
 	fclose(summary);
 
 	return 1;
+}
+
+void ReadParameter(int argc, char *argv[])
+{
+
+	static const char *optString = "b:n:o:s:l:a:t:M:N:PL:I:O:h?";
+
+	static const struct option longOpts[] = {
+		{ "blockFrequencyBlockLength", required_argument,NULL, 'b' },
+		{ "nonOverlappingTemplateBlockLength", required_argument,NULL, 'n' },
+		{ "overlappingTemplateBlockLength", required_argument,NULL, 'o' },
+		{ "serialBlockLength", required_argument,NULL, 's' },
+		{ "linearComplexitySequenceLength", required_argument,NULL, 'l' },
+		{ "approximateEntropyBlockLength", required_argument,NULL, 'a' },
+		{ "parameterFromCommandline", no_argument, NULL, 'P'},
+		{ "modeOfFile", required_argument, NULL, 'M'},
+		{ "numOfBitStream", required_argument, NULL, 'N'},
+		{ "tests", required_argument,NULL, 't' },
+		{ "length", required_argument,NULL, 'L' },
+		{ "input", required_argument,NULL, 'I' },
+		{ "output", required_argument,NULL, 'O' },		
+		{ "help", no_argument, NULL, 'h'},
+		{ NULL, no_argument, NULL, 0 }
+	};	
+	int opt = -1;
+
+	memset(&args, 0, sizeof(args));	
+	args.para.blockFrequencyBlockLength = 128;
+	args.para.nonOverlappingTemplateBlockLength = 9;
+	args.para.overlappingTemplateBlockLength = 9;
+	args.para.approximateEntropyBlockLength = 10;
+	args.para.serialBlockLength = 16;
+	args.para.linearComplexitySequenceLength = 500;
+	args.para.numOfBitStreams = 100;
+	args.mode = MODE_ASCII;
+	args.ptests = 1;
+	args.tests[0]  = 0;
+
+	args.inFile = stdin;
+	args.outFile = stdout;
+    while( (opt = getopt_long( argc, argv, optString, longOpts, NULL)) != -1 ) {
+        switch( opt ) {
+			case 'b':
+				args.para.blockFrequencyBlockLength = atoi(optarg);                
+                break;
+			case 'n':
+				args.para.nonOverlappingTemplateBlockLength = atoi(optarg);                
+                break;
+			case 'o':
+				args.para.overlappingTemplateBlockLength = atoi(optarg);                
+                break;
+			case 's':
+				args.para.serialBlockLength = atoi(optarg);                
+                break;
+			case 'l':
+				args.para.linearComplexitySequenceLength = atoi(optarg);                
+                break;
+			case 'a':
+				args.para.approximateEntropyBlockLength = atoi(optarg);                
+                break;
+			case 't':				
+				args.ptests = split(optarg, ",", args.tests, NUMOFTESTS);
+				if(args.ptests <= 0 || Check_Range(args.tests, NUMOFTESTS, 0, NUMOFTESTS) == 0) {
+					Exit(ERROR_BAD_TEST_PARAMETER, optarg);					
+				}				
+				break;
+			case 'P':
+				args.pflag = 1;
+                break;
+			case 'M':				
+				args.mode = atoi(optarg);
+				if(args.mode != MODE_ASCII && args.mode !=  MODE_BINARY) {
+					Exit(ERROR_BAD_MODE_PARAMETER, optarg);	
+				}
+                break;
+			case 'N':
+				args.para.numOfBitStreams = atoi(optarg);
+                break;
+			case 'L':
+				args.n = atoi(optarg);                
+                break;
+            case 'O':
+                args.outFileName = optarg;
+                break;
+			case 'I':
+                args.inFileName = optarg;
+                break;
+            case 'h':   /* fall-through is intentional */
+            case '?':
+                display_usage();	Exit(0, NULL);
+                break;
+            default:
+                /* You won't actually get here. */
+                break;
+        }		
+	};
+	if(args.n == 0) { display_usage();	Exit(0, NULL); }
+}
+
+void display_usage()
+{
+	/*
+	args.para.blockFrequencyBlockLength = 128;
+	args.para.nonOverlappingTemplateBlockLength = 9;
+	args.para.overlappingTemplateBlockLength = 9;
+	args.para.approximateEntropyBlockLength = 10;
+	args.para.serialBlockLength = 16;
+	args.para.linearComplexitySequenceLength = 500;
+	*/
+	printf(""
+"assess [options] --length num\n"
+"  -L, --length num       length of stream to be tested. \n"
+"all options:\n"
+"options for tests:\n"
+"  -b, --blockFrequencyBlockLength n           Default is %d.  \n"
+"  -n, --nonOverlappingTemplateBlockLength n   Default is %d.  \n"
+"  -o, --overlappingTemplateBlockLength n      Default is %d.  \n"
+"  -a, --approximateEntropyBlockLength n       Default is %d.  \n"
+"  -s, --serialBlockLength n                   Default is %d.  \n"
+"  -l, --linearComplexitySequenceLength n      Default is %d.  \n"
+"options for control:\n"
+"  -t, --tests n1,n2,...nm          Default is 0. \n"
+"                                   Could be any integers in this rang [0, %d]. \n"
+"                                   0 indicates invoking all tests. \n"
+"  -N, --numOfBitStream n           Default is %d. \n"
+"  -M, --mode n                     Default is %d. \n"
+"                                   Could be %d(%s) or %d(%s). \n"
+"  -P, --parameterFromCommandline   Set parameter from command line. \n"
+"  -I, --input filename             Default is stdin.  \n"
+"  -O, --output filename            Default is stdout. \n"
+"  -h, --help                       Show this message. \n"
+"", 
+args.para.blockFrequencyBlockLength,
+args.para.nonOverlappingTemplateBlockLength,
+args.para.overlappingTemplateBlockLength,
+args.para.approximateEntropyBlockLength,
+args.para.serialBlockLength,
+args.para.linearComplexitySequenceLength,
+NUMOFTESTS,
+args.para.numOfBitStreams,
+args.mode, MODE_BINARY, "BINARY", MODE_ASCII, "ASCII");
+}
+
+void Exit(int code, const void *more)
+{
+	if(code == ERROR_CANT_OPEN_FILE) printf("Can't open file:[%s].\n", (char *)more);
+	if(code == ERROR_BAD_TEST_PARAMETER) printf("Bad parameter for -t, --test:[%s].\n", (char*)more);
+	if(code == ERROR_BAD_MODE_PARAMETER) printf("Bad parameter for -M, --mode:[%s].\n", (char*)more);
+	exit(code);
 }
 
 void
@@ -120,10 +282,10 @@ partitionResultFile(int numOfFiles, int numOfSequences, int option, int testName
 	FILE	**fp = (FILE **)calloc(numOfFiles+1, sizeof(FILE *));
 	int		*results = (int *)calloc(numOfFiles, sizeof(int *));
 	char	*s[MAXFILESPERMITTEDFORPARTITION];
-	char	resultsDir[200];
+	char	resultsDir[MAX_PATH];
 	
 	for ( i=0; i<MAXFILESPERMITTEDFORPARTITION; i++ )
-		s[i] = (char*)calloc(200, sizeof(char));
+		s[i] = (char*)calloc(MAX_PATH, sizeof(char));
 	
 	sprintf(resultsDir, "experiments/%s/%s/results.txt", generatorDir[option], testNames[testNameID]);
 	
@@ -259,7 +421,7 @@ postProcessResults(int option)
 			fprintf(summary, "random excursion (variant) test is undefined.\n\n");
 		}
 		else {
-			passRate = (p_hat - 3.0 * sqrt((p_hat*ALPHA)/generalSampleSize)) * generalSampleSize;
+			passRate = (int)((p_hat - 3.0 * sqrt((p_hat*ALPHA)/generalSampleSize)) * generalSampleSize);
 			fprintf(summary, "The minimum pass rate for each statistical test with the exception of the\n");
 			fprintf(summary, "random excursion (variant) test is approximately = %d for a\n", generalSampleSize ? passRate : 0);
 			fprintf(summary, "sample size = %d binary sequences.\n\n", generalSampleSize);
@@ -269,7 +431,7 @@ postProcessResults(int option)
 		if ( randomExcursionSampleSize == 0 )
 			fprintf(summary, "The minimum pass rate for the random excursion (variant) test is undefined.\n\n");
 		else {
-			passRate = (p_hat - 3.0 * sqrt((p_hat*ALPHA)/randomExcursionSampleSize)) * randomExcursionSampleSize;
+			passRate = (int)((p_hat - 3.0 * sqrt((p_hat*ALPHA)/randomExcursionSampleSize)) * randomExcursionSampleSize);
 			fprintf(summary, "The minimum pass rate for the random excursion (variant) test\n");
 			fprintf(summary, "is approximately = %d for a sample size = %d binary sequences.\n\n", passRate, randomExcursionSampleSize);
 		}
@@ -284,7 +446,7 @@ computeMetrics(char *s, int test)
 {
 	int		j, pos, count, passCount, sampleSize, expCount, proportion_threshold_min, proportion_threshold_max;
 	int		freqPerBin[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	double	*A, *T, chi2, proportion, uniformity, p_hat, tmp;
+	double	*A, *T, chi2, uniformity, p_hat;
 	float	c;
 	FILE	*fp;
 	
@@ -294,7 +456,7 @@ computeMetrics(char *s, int test)
 		exit(-1);
 	}
 	
-	if ( (A = (double *)calloc(tp.numOfBitStreams, sizeof(double))) == NULL ) {
+	if ( (A = (double *)calloc(args.para.numOfBitStreams, sizeof(double))) == NULL ) {
 		printf("Final Analysis Report aborted due to insufficient workspace\n");
 		return 0;
 	}
@@ -302,10 +464,10 @@ computeMetrics(char *s, int test)
 	/* Compute Metric 1: Proportion of Passing Sequences */
 	
 	count = 0; 		
-	sampleSize = tp.numOfBitStreams;
+	sampleSize = args.para.numOfBitStreams;
 	
 	if ( (test == TEST_RND_EXCURSION) || (test == TEST_RND_EXCURSION_VAR) ) { /* Special Case: Random Excursion Tests */
-		if ( (T = (double *)calloc(tp.numOfBitStreams, sizeof(double))) == NULL ) {
+		if ( (T = (double *)calloc(args.para.numOfBitStreams, sizeof(double))) == NULL ) {
 			printf("Final Analysis Report aborted due to insufficient workspace\n");
 			return 0;
 		}
@@ -348,8 +510,8 @@ computeMetrics(char *s, int test)
 		passCount = sampleSize - count;
 	
 	p_hat = 1.0 - ALPHA;
-	proportion_threshold_max = (p_hat + 3.0 * sqrt((p_hat*ALPHA)/sampleSize)) * sampleSize;
-	proportion_threshold_min = (p_hat - 3.0 * sqrt((p_hat*ALPHA)/sampleSize)) * sampleSize;
+	proportion_threshold_max = (int)((p_hat + 3.0 * sqrt((p_hat*ALPHA)/sampleSize)) * sampleSize);
+	proportion_threshold_min = (int)((p_hat - 3.0 * sqrt((p_hat*ALPHA)/sampleSize)) * sampleSize);
 	
 	/* Compute Metric 2: Histogram */
 	

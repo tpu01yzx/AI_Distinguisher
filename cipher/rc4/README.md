@@ -6,6 +6,10 @@ Usage: ./rc4 -l lenght(byte) -k key -o output
 
   -o 输出文件名
 
+  -q 输出密钥流到stdout
+
+PS：明文采取rand函数根据时间生成
+
 
 Example：
 
