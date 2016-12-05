@@ -111,6 +111,7 @@ main(int argc, char *argv[])
 		partitionResultFile(18, args.para.numOfBitStreams, option, TEST_RND_EXCURSION_VAR);
 	if ( (testVector[0] == 1) || (testVector[TEST_SERIAL] == 1) )
 		partitionResultFile(2, args.para.numOfBitStreams, option, TEST_SERIAL);
+	/*
 	fprintf(summary, "------------------------------------------------------------------------------\n");
 	fprintf(summary, "RESULTS FOR THE UNIFORMITY OF P-VALUES AND THE PROPORTION OF PASSING SEQUENCES\n");
 	fprintf(summary, "------------------------------------------------------------------------------\n");
@@ -119,6 +120,7 @@ main(int argc, char *argv[])
 	fprintf(summary, " C1  C2  C3  C4  C5  C6  C7  C8  C9 C10  P-VALUE  PROPORTION  STATISTICAL TEST\n");
 	fprintf(summary, "------------------------------------------------------------------------------\n");
 	fflush(summary);
+	*/
 	postProcessResults(option);
 	fclose(summary);
 
@@ -392,7 +394,7 @@ postProcessResults(int option)
 			}
 		}
 	}
-
+	/*
 	fprintf(summary, "\n\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
 	case1 = 0;
 	case2 = 0;
@@ -429,6 +431,7 @@ postProcessResults(int option)
 	fprintf(summary, "For further guidelines construct a probability table using the MAPLE program\n");
 	fprintf(summary, "provided in the addendum section of the documentation.\n");
 	fprintf(summary, "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+	*/
 }
 
 int
@@ -521,8 +524,8 @@ computeMetrics(char *s, int test)
 			chi2 += pow(freqPerBin[j]-expCount, 2)/expCount;
 		uniformity = cephes_igamc(9.0/2.0, chi2/2.0);
 	}
-	
-	for ( j=0; j<10; j++ )			/* DISPLAY RESULTS */
+	/*
+	for ( j=0; j<10; j++ )			//DISPLAY RESULTS
 		fprintf(summary, "%3d ", freqPerBin[j]);
 	
 	if ( expCount == 0 )
@@ -539,7 +542,13 @@ computeMetrics(char *s, int test)
 		fprintf(summary, "%4d/%-4d *  %s\n", passCount, sampleSize, testNames[test]);
 	else
 		fprintf(summary, "%4d/%-4d    %s\n", passCount, sampleSize, testNames[test]);
-	
+	*/
+
+	if ( expCount == 0 )
+		fprintf(summary, " %8.6f", 0);
+	else
+		fprintf(summary, " %8.6f", uniformity);
+
 	fclose(fp);
 	free(A);
 	

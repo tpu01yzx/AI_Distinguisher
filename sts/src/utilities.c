@@ -479,7 +479,7 @@ do{ \
 
 #define TEST2(f, arg1, arg2) \
 do{ \
-	fprintf(stdout, "\r#[%s] "#f"(%d, %d).                ", gettime(), arg1, arg2); \
+	fprintf(stdout, "\r#[%s] "#f"(%d, %d).\n", gettime(), arg1, arg2); \
 	fprintf(freqfp, "#[%s] "#f"(%d, %d) is running.\n", gettime(), arg1, arg2); \
 	f(arg1, arg2); \
 	fprintf(freqfp, "#[%s] "#f"(%d, %d) is finished.\n", gettime(), arg1, arg2); \
@@ -489,7 +489,7 @@ void
 nist_test_suite(int k)
 {
 
-	fprintf(stdout, "\n%d/%d                            \n", k, args.para.numOfBitStreams);
+	fprintf(stdout, "%d/%d\n", k, args.para.numOfBitStreams);
 
 	if ( (testVector[0] == 1) || (testVector[TEST_FREQUENCY] == 1) ) 
 		TEST1(Frequency, args.n);
