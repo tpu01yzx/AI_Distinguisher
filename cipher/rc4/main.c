@@ -51,10 +51,10 @@ int generate(){
         fwrite(mbuf, ret, 1, fp_keys);
 	}
 
-    	free(buf);
-    	free(mbuf);
+    free(buf);
+    free(mbuf);
 
-    	fclose(dats_src);
+    fclose(dats_src);
 	fclose(fp_dats);
 	fclose(fp_keys);
 	//close file
