@@ -52,7 +52,7 @@ int generate(){
         salsa20(buf, l, skey, nonce);
         //enc
         for(i=0;i<l;i++){
-            buf[i] = buf[i] ^ mbuf[i];
+            mbuf[i] = buf[i] ^ mbuf[i];
         }
         //get key stream
         fwrite(buf, ret, 1, fp_dats);
