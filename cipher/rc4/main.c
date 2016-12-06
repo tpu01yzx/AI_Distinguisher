@@ -19,8 +19,8 @@ int generate(){
 	//set start time
 	FILE *dats_src, *fp_dats, *fp_keys;
 	dats_src = fopen(input_dats, "rb");
-    fp_dats = fopen(output_dats, "wb");
-    fp_keys = fopen(output_keys, "wb");
+    	fp_dats = fopen(output_dats, "wb");
+    	fp_keys = fopen(output_keys, "wb");
 	if(!dats_src || !fp_dats || !fp_keys){
 		perror("fopen");
 		return -1;
@@ -41,20 +41,20 @@ int generate(){
         len -= ret;
         memcpy(mbuf, buf, l);
         //fill buf
-        rc4_crypt(mbuf, l, key, strlen(key));
+        rc4_crypt(buf, l, key, strlen(key));
         //enc
         for(i=0;i<l;i++){
-            buf[i] = buf[i] ^ mbuf[i];
+            mbuf[i] = buf[i] ^ mbuf[i];
         }
         //get key stream
         fwrite(buf, ret, 1, fp_dats);
         fwrite(mbuf, ret, 1, fp_keys);
 	}
 
-    free(buf);
-    free(mbuf);
+    	free(buf);
+    	free(mbuf);
 
-    fclose(dats_src);
+    	fclose(dats_src);
 	fclose(fp_dats);
 	fclose(fp_keys);
 	//close file
