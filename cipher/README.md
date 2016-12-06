@@ -1,5 +1,5 @@
 label | cipher
-- | -
+---|---
 1 | rc4
 2 | hc256
 3 | salsa20
