@@ -387,6 +387,11 @@ openOutputStreams(int option)
 		printf("\t\tMAIN:  Could not open stats file: <%s>", summaryfn);
 		exit(-1);
 	}
+
+	if ( args.outFileName != NULL && (args.outFile = fopen(args.outFileName, "w")) == NULL ){
+		printf("\t\tMAIN:  Could not open output file: <%s>", args.outFileName);
+		exit(-1);
+	}
 	
 	for( i=1; i<=NUMOFTESTS; i++ ) {
 		if ( testVector[i] == 1 ) {
@@ -479,7 +484,7 @@ do{ \
 
 #define TEST2(f, arg1, arg2) \
 do{ \
-	fprintf(stdout, "\r#[%s] "#f"(%d, %d).                ", gettime(), arg1, arg2); \
+	fprintf(stdout, "\r#[%s] "#f"(%d, %d).\n", gettime(), arg1, arg2); \
 	fprintf(freqfp, "#[%s] "#f"(%d, %d) is running.\n", gettime(), arg1, arg2); \
 	f(arg1, arg2); \
 	fprintf(freqfp, "#[%s] "#f"(%d, %d) is finished.\n", gettime(), arg1, arg2); \
@@ -489,7 +494,7 @@ void
 nist_test_suite(int k)
 {
 
-	fprintf(stdout, "\n%d/%d                            \n", k, args.para.numOfBitStreams);
+	fprintf(stdout, "%d/%d\n", k, args.para.numOfBitStreams);
 
 	if ( (testVector[0] == 1) || (testVector[TEST_FREQUENCY] == 1) ) 
 		TEST1(Frequency, args.n);

@@ -122,6 +122,8 @@ main(int argc, char *argv[])
 	postProcessResults(option);
 	fclose(summary);
 
+	fclose(args.outFile);
+
 	return 1;
 }
 
@@ -540,6 +542,12 @@ computeMetrics(char *s, int test)
 	else
 		fprintf(summary, "%4d/%-4d    %s\n", passCount, sampleSize, testNames[test]);
 	
+	if ( expCount == 0 )
+		fprintf(args.outFile, " %8.6f", 0);
+	else
+		fprintf(args.outFile, " %8.6f", uniformity);
+
+
 	fclose(fp);
 	free(A);
 	
