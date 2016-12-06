@@ -3,95 +3,121 @@
 #include <unistd.h>
 #include <string.h>
 #include <getopt.h>
-#include <math.h>
-#include <time.h>
 
 #include "salsa20.c"
 
 #define max(a,b) ( ((a)>(b)) ? (a):(b) )
 #define min(a,b) ( ((a)>(b)) ? (b):(a) )
 
-int len;
-unsigned char *key=NULL;
-char *output=NULL;
-
+int block_size = 8192;//default block size
+long long int output_len = 0;
+unsigned char *key = "000000";//default key 000000
+char *input_dats = "/dev/urandom";
+char *output_dats = "/dev/stdout";
+char *output_keys = "/dev/null";
 
 int generate(){
 	clock_t start, end;
 	start = clock();
 	//set start time
-	srand(time(0));
-	//set srand
-	char *buf = malloc(len);
-	if(buf == NULL){
+	FILE *dats_src, *fp_dats, *fp_keys;
+	dats_src = fopen(input_dats, "rb");
+    fp_dats = fopen(output_dats, "wb");
+    fp_keys = fopen(output_keys, "wb");
+	if(!dats_src || !fp_dats || !fp_keys){
+		perror("fopen");
+		return -1;
+	}
+	//open file
+	char *buf = malloc(block_size);
+	char *mbuf = malloc(block_size);
+	if(!buf || !mbuf){
 		perror("malloc");
 		return -1;
 	}
 	//malloc buf
-	int i;
-	for(i=0;i<len;i++){
-		buf[i] = rand()%256;
+	uint64_t nonce = 0;
+	uint8_t skey[32] = {0};
+    memset(skey, 0, 32);
+    memcpy(skey, key, min(32, strlen(key)));
+    //set salsa20 key
+	long long int len = output_len;
+	int i, ret = 1;
+	while(len > 0 && ret){
+        int l = len < block_size ? len : block_size;
+        ret = fread(buf, 1, l, dats_src);
+        len -= ret;
+        memcpy(mbuf, buf, l);
+        //fill buf
+        salsa20(buf, l, skey, nonce);
+        //enc
+        for(i=0;i<l;i++){
+            buf[i] = buf[i] ^ mbuf[i];
+        }
+        //get key stream
+        fwrite(buf, ret, 1, fp_dats);
+        fwrite(mbuf, ret, 1, fp_keys);
 	}
-	//fill buf
-  uint8_t skey[32] = {0};
-	memset(skey, 0, 32);
-	memcpy(skey, key, min(32, strlen(key)));
-  uint64_t nonce = 0;
-	salsa20(buf, len, skey, nonce);
-	//enc
-	FILE *fp;
-	fp = fopen(output, "w");
-	if(fp == NULL){
-		perror("fopen");
-		return -1;
-	}
-	fwrite(buf, len, 1, fp);
-	fclose(fp);
-	//saveto file
-	end = clock();
-	double diff = (double)(end-start)/CLOCKS_PER_SEC;
-	fprintf(stdout, "Generate %d bytes (%.2fMB) in %f s, %.2f MB/s\n", len, (double)len/1024/1024, diff, len/1024/1024/diff);
+
+    free(buf);
+    free(mbuf);
+
+    fclose(dats_src);
+	fclose(fp_dats);
+	fclose(fp_keys);
+	//close file
 	return 0;
 }
 
 void usage(const char *progname){
-	fprintf(stderr, "Salsa20 generator\n"
-		"Usage: %s\n"
-			"\t-l lenght(byte)\n"
-			"\t-k key\n"
-			"\t-o output\n"
+	fprintf(stderr, "Salsa20 stream generator\n"
+  "Usage: %s [options] -l length\n"
+			"\t-l   Output lenght (byte)\n"
+			"\t-b   Block size (byte), default is 8192\n"
+			"\t-k   Encryption key, default is 000000 (ASCII)\n"
+			"\t-o   Cipher stream to file, default is /dev/stdout\n"
+			"\t-s   Secret key stream to file, default is /dev/null\n"
+			"\t-i   Encrypted stream from file, default is /dev/urandom\n"
+			"\t-h   Show this message\n"
 			"\n",
 		progname);
 }
 
 int main(int argc, char *argv[]){
-	int ch;
-
-	if(argc == 1){
-		usage(argv[0]);
-		return -1;
-	}
-
-	while((ch = getopt(argc, argv, "l:k:o:")) != -1){
+    int ch;
+	while((ch = getopt(argc, argv, "l:b:k:o:s:i:h")) != -1){
 		switch(ch){
 			case 'l':
-				len = atoi(optarg);
+				output_len = atoll(optarg);
+				break;
+            case 'b':
+				block_size = atoi(optarg);
 				break;
 			case 'k':
 				key = optarg;
 				break;
+            case 'i':
+				input_dats = optarg;
+				break;
 			case 'o':
-				output = optarg;
+				output_dats = optarg;
+				break;
+			case 's':
+				output_keys = optarg;
+				break;
+            case 'h':
+				usage(argv[0]);
+				return 0;
 				break;
 			default:
 				usage(argv[0]);
 				return -1;
 		}
 	}
-
-	if(output == NULL || key == NULL || len == 0){
-		usage(argv[0]);
-		return -1;
+	
+	if(!output_len){
+        usage(argv[0]);
+        return -1;
 	}
 
 	generate();
