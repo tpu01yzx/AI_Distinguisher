@@ -387,6 +387,11 @@ openOutputStreams(int option)
 		printf("\t\tMAIN:  Could not open stats file: <%s>", summaryfn);
 		exit(-1);
 	}
+
+	if ( args.outFileName != NULL && (args.outFile = fopen(args.outFileName, "w")) == NULL ){
+		printf("\t\tMAIN:  Could not open output file: <%s>", args.outFileName);
+		exit(-1);
+	}
 	
 	for( i=1; i<=NUMOFTESTS; i++ ) {
 		if ( testVector[i] == 1 ) {
