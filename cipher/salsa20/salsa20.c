@@ -48,11 +48,14 @@ void salsa20_block(uint8_t *out, uint8_t key[32], uint64_t nonce, uint64_t index
 
 // enc/dec: xor a message with transformations of key, a per-message nonce and block index
 void salsa20(uint8_t *message, uint64_t mlen, uint8_t key[32], uint64_t nonce) {
-	int i;
-	uint8_t block[64];
-	for (i=0; i<mlen; i++) {
+	static int i;
+	static uint8_t block[64];
+	int k;
+
+	for (k=0; k<mlen; k++) {
 		if (i%64 == 0) salsa20_block(block, key, nonce, i/64);
-		message[i] ^= block[i%64];
+		message[k] ^= block[i%64];
+		i++;
 	}
 }
 
