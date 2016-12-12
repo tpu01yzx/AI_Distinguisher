@@ -41,17 +41,16 @@ int generate(){
 	unsigned char s[256];
 	rc4_init(s, input_buf, input_len);
 	//init cipher
-	int ret = 1;
 	long long int len = output_len;
 	//init loop env
-	while(len > 0 && ret){
+	while(len > 0){
         int l = len < block_size ? len : block_size;
         bzero(output_buf, block_size);
-        len -= ret;
+        len -= block_size;
         //fill zero stream
         rc4_crypt(s, output_buf, l);
         //save key stream
-        fwrite(output_buf, ret, 1, fp_des);
+        fwrite(output_buf, l, 1, fp_des);
 	}
 
 	free(input_buf);
