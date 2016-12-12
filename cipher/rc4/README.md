@@ -1,16 +1,16 @@
-Usage: ./rc4 -l lenght(byte)<br />
-  -l 需要生成的加密流长度<br />
-  -b 数据分块的大小，默认为8KB<br />
-  -k 密钥，默认为000000（ASCII）<br />
-  -o 输出加密流文件，默认为/dev/stdout <br />
-  -s 输出密钥流到文件，默认为/dev/null（即不输出）<br />
-  -i 输入的数据流文件，默认为/dev/urandom （unix随机流）<br />
+Usage: ./rc4 -L lenght(byte)<br />
+  -i 输入密钥的文件<br />
+  -l 密钥长度<br />
+  -o 输出密钥流的文件名<br />
+  -L 输出密钥流的长度，字节为单位<br />
+  -b 分块大小<br />
+  -q 显示生成信息<br />
 <br />
 Example：<br />
   生成 100MB 的文件 1024*1024*100 <br />
-  密钥 123456<br />
+  密钥为0的256字节<br />
   输出到 当前目录 o.dat<br />
-  ./rc4 -l 104857600 -k 123456 -o o.dat<br />
+  ./rc4 -L 104857600 -i /dev/zero -l 256 -o o.dat<br />
 <br />
 PS:<br />
     标准输出流 /dev/stdout<br />
